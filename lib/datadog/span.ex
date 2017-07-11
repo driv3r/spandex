@@ -8,6 +8,8 @@ defmodule Spandex.Datadog.Span do
   alias __MODULE__, as: Span
   alias Spandex.Datadog.Utils
 
+  require Logger
+
   defstruct [
     :id, :trace_id, :parent_id, :name, :resource,
     :service, :env, :start, :completion_time, :error,
