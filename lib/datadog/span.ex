@@ -99,6 +99,12 @@ defmodule Spandex.Datadog.Span do
     service = span.service || default_service()
     now = Utils.now()
 
+    if Confex.get_env(:spandex, :log_traces?) do
+      Logger.debug fn ->
+        "Mapping Trace: #{inspect(span)}"
+      end
+    end
+
     %{
       trace_id: span.trace_id,
       span_id: span.id,
