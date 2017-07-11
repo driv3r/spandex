@@ -40,9 +40,17 @@ defmodule Spandex.Datadog.Span do
       resource: default_if_blank(map, :resource, fn -> Map.get(map, :name, @default) end),
     }
 
-    core
-    |> Map.put(:type, default_if_blank(map, :type, fn -> default_type(core.service) end))
-    |> Map.merge(Map.drop(map, [:id, :env, :service, :resource, :type]))
+    verbose fn -> "New Span from: #{inspect(map)}" end
+    verbose fn -> "New Span: #{inspect(core)}" end
+
+    res =
+      core
+      |> Map.put(:type, default_if_blank(map, :type, fn -> default_type(core.service) end))
+      |> Map.merge(Map.drop(map, [:id, :env, :service, :resource, :type]))
+
+    verbose fn -> "Builded Span: #{inspect(res)}" end
+
+    res
   end
 
   @doc """
@@ -101,10 +109,8 @@ defmodule Spandex.Datadog.Span do
     service = span.service || default_service()
     now = Utils.now()
 
-    if Confex.get_env(:spandex, :log_traces?) do
-      Logger.debug fn ->
-        "Mapping Trace: #{inspect(span)}"
-      end
+    verbose fn ->
+      "Mapping Trace: #{inspect(span)}"
     end
 
     %{
@@ -177,5 +183,11 @@ defmodule Spandex.Datadog.Span do
     |> Confex.get_env(:datadog)
     |> Keyword.get(:services, [])
     |> Keyword.get(service, @default)
+  end
+
+  def verbose(fun) do
+    if Confex.get_env(:spandex, :log_traces?) do
+      Logger.debug(fun)
+    end
   end
 end
